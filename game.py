@@ -55,13 +55,19 @@ class Game:
         self.ship.shooting_cooldown_reduction(self.clock.get_time())
 
     def update(self):
+        # ship
         self.ship.update(self.screen)
+        for asteroid in self.asteroids:
+            if self.ship.hitbox.colliderect(asteroid.hitbox):
+                self.game_over = True
+        # asteroids
         for asteroid in self.asteroids:
             asteroid.update(self.screen)
             bullets_that_hit_asteroid = self.find_bullets_hitting_asteroid(asteroid)
             if len(bullets_that_hit_asteroid) > 0:
                 self.ship.remove_bullets(bullets_that_hit_asteroid)
                 self.destroy_asteroid(asteroid)
+        # bullets
         for bullet in self.ship.bullets:
             if bullet.is_outside_screen(self.screen):
                 self.ship.remove_bullet(bullet)
@@ -74,14 +80,14 @@ class Game:
     def find_asteroids_hit_by_bullet(self, bullet:Bullet):
         asteroids = []
         for asteroid in self.asteroids:
-            if asteroid.rect.colliderect(bullet.rect):
+            if asteroid.hitbox.colliderect(bullet.rect):
                 asteroids.append(asteroid)
         return asteroids
 
     def find_bullets_hitting_asteroid(self, asteroid: Asteroid):
         bullets = []
         for bullet in self.ship.bullets:
-            if asteroid.rect.colliderect(bullet.rect):
+            if asteroid.hitbox.colliderect(bullet.rect):
                 bullets.append(bullet)
         return bullets
 
