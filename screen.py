@@ -1,4 +1,5 @@
 import pygame
+from pygame import Vector2
 
 class Screen:
     TITLE = "asteroid"
@@ -14,6 +15,9 @@ class Screen:
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
+
+    def wrap_position(self, pos):
+        return Vector2(pos[0] % self.screen_width, pos[1] % self.screen_height)
 
     def update(self):
         pygame.display.update()
