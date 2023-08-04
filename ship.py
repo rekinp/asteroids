@@ -1,12 +1,17 @@
+from math import sqrt
+
 import pygame
 from pygame import Vector2
 from bullet import Bullet
 from typing import List
+from asteroid import Asteroid
+from pygame.mixer import Sound
+from settings import SoundAsset, ImageAsset
 
 class Ship():
     DRIFT = False
-    ROTATION_SPEED = 3
-    SPEED = 2
+    ROTATION_SPEED = 4
+    SPEED = 3
     STARTING_VECTOR = Vector2(0, -1*SPEED)
     SHOOTING_COOLDOWN = 300
     def __init__(self, pos):
@@ -16,8 +21,13 @@ class Ship():
         self.can_shoot = 0
         self.bullets = []
         self.drift = (0, 0)
-        self.image = pygame.image.load("resources/images/ship.png")
+        self.image = pygame.image.load(ImageAsset.ship.value)
         self.rotated_image = self.image
+        # sounds
+        self.sound_shoot = Sound(SoundAsset.shoot.value)
+        self.sound_shoot.set_volume(0.1)
+        self.sound_explosion = Sound(SoundAsset.explosion.value)
+        self.sound_explosion.set_volume(0.5)
         self.rect = self.image.get_rect(center=self.pos)
         self.set_hitbox()
 
@@ -36,7 +46,7 @@ class Ship():
     def set_hitbox(self):
         hitbox_ratio = 0.8
         self.offset = (self.rect[2] * (1 - hitbox_ratio))//2
-        self.hitbox = pygame.Rect(self.rect[0], self.rect[1], self.rect[2]*0.9, self.rect[3]*0.9)
+        self.hitbox = pygame.Rect(self.rect[0], self.rect[1], self.rect[2]*hitbox_ratio, self.rect[3]*hitbox_ratio)
 
     def update_hitbox_position(self):
         self.hitbox[0] = self.rect[0] + self.offset
@@ -48,6 +58,14 @@ class Ship():
         self.rect = self.image.get_rect(center=self.pos)
         self.update_hitbox_position()
         self.set_rotated_image()
+
+    def collides_with_asteroid(self, asteroid: Asteroid):
+        distance = sqrt(pow(asteroid.pos[0] - self.pos[0], 2) + pow(asteroid.pos[1] - self.pos[1], 2))
+        # print(f"distance: {distance}")
+        if distance <= self.hitbox[2]/2 + asteroid.hitbox[2]/2:
+            return True
+        else:
+            return False
 
     def shooting_cooldown_reduction(self, time):
         if self.can_shoot > 0:
@@ -78,11 +96,13 @@ class Ship():
 
     def shoot(self):
         bullet = Bullet(pos=Vector2(self.pos), velocity=self.forward * 5)
+        self.sound_shoot.play()
         self.cooldown_shooting()
         self.bullets.append(bullet)
 
     def remove_bullet(self, bullet: Bullet):
-        self.bullets.remove(bullet)
+        if bullet in self.bullets:
+            self.bullets.remove(bullet)
 
     def remove_bullets(self, bullets: List[Bullet]):
         for bullet in bullets:

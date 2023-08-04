@@ -1,5 +1,6 @@
 import pygame
 from pygame import Vector2
+from settings import ImageAsset
 
 class Screen:
     TITLE = "asteroid"
@@ -7,7 +8,7 @@ class Screen:
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), 0, 32)
-        self.background = pygame.image.load("resources/images/space.png")
+        self.background = pygame.image.load(ImageAsset.space.value)
         pygame.display.set_caption(self.TITLE)
 
     def blit(self, image, pos):
