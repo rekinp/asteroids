@@ -5,11 +5,11 @@ Embark on an interstellar journey in "Asteroid Adventure," a thrilling arcade-st
 
 **Gameplay Mechanics:**
 
-Use the arrow keys to control your spacecraft's movement.
-Press the spacebar to fire your ship's primary weapon and destroy asteroids.
+- Use the arrow keys to control your spacecraft's movement.
+- Press the spacebar to fire your ship's primary weapon and destroy asteroids.
 
 
 **Credits:**
 Sound effects taken from opengameart.org
-theme music made by jdagenet or Jason Dagenet:
+theme music made by Jason Dagenet:
 https://opengameart.org/content/is-anybody-home
