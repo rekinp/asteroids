@@ -2,11 +2,13 @@ import pygame
 import random
 from pygame.key import ScancodeWrapper
 from typing import List, Tuple
+from text_box import TextBox
 
 from screen import Screen
 from ship import Ship
 from asteroid import Asteroid
-from settings import ScreenSize, ImageAsset
+from settings import ScreenSize, ImageAsset, SoundAsset
+from pygame.mixer import Sound
 from bullet import Bullet
 
 
@@ -21,19 +23,29 @@ class Game:
         self.clock = pygame.time.Clock()
         self.fps = 30
 
+        # sounds
+        self.sound_theme = Sound(SoundAsset.theme.value)
+
         # game controls
         self.game_over = False
         self.pause_game = False
 
         # game objects
         self.screen = Screen(screen_width=ScreenSize.WIDTH.value, screen_height=ScreenSize.HEIGHT.value)
+        self.timer = TextBox(text='0', size=80)
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
+        # ship
         self.ship = Ship(pos=(400, 400))
         safe_distance = 200
         self.ship_start_rect = pygame.Rect(self.ship.pos[0] - safe_distance / 2, self.ship.pos[1] - safe_distance / 2,
                                            safe_distance, safe_distance)
+        # asteroids
         self.asteroids: List[Asteroid] = []
         self.asteroids_that_were_hit: List[Asteroid] = []
         self.bullets_that_hit_asteroids: List[Bullet] = []
+        self.generate_asteroids()
+
+    def generate_asteroids(self):
         for i in range(self.NUMBER_OF_ASTEROIDS):
             # self.asteroids.append(Asteroid(size=1, pos=(64, 64), screen=self.screen))
             asteroid = Asteroid(size=random.randint(1, 3),
@@ -56,6 +68,7 @@ class Game:
             self.destroy_asteroid(asteroid)
 
     def run(self):
+        self.sound_theme.play(0)
         while not self.game_over:
             self.handle_events()
             if not self.pause_game:
@@ -67,9 +80,15 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.game_over = True
+            if event.type == pygame.USEREVENT and self.asteroids and self.ship is not None:
+                counter = int(self.timer.get_text()) + 1
+                self.timer.set_text(text=str(counter))
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     self.pause_game = not (self.pause_game)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    self.__init__()
         if not (self.pause_game) and not (self.ship is None):
             key_pressed: ScancodeWrapper = pygame.key.get_pressed()
             if key_pressed[pygame.K_UP] or key_pressed[pygame.K_DOWN] or key_pressed[pygame.K_LEFT] or key_pressed[
@@ -114,6 +133,7 @@ class Game:
                     self.ship = None
                     break
 
+
     def detect_asteroid_bullet_collisions(self):
         asteroids = []
         bullets = []
@@ -135,30 +155,44 @@ class Game:
                 asteroids.append(asteroid)
         return asteroids
 
-    def find_bullets_hitting_asteroid(self, asteroid: Asteroid):
-        bullets = []
-        for bullet in self.ship.bullets:
-            if asteroid.hitbox.colliderect(bullet.rect):
-                bullets.append(bullet)
-        return bullets
-
     def render_exploded_object(self, pos):
         img = pygame.image.load(ImageAsset.explosion.value)
         self.screen.blit(img, img.get_rect(center=pos))
 
     def render(self):
         self.screen.render()
+        self.timer.render(screen=self.screen, pos=(self.screen.screen_width*0.85, self.screen.screen_height*0.02))
+        for asteroid in self.asteroids:
+            asteroid.render(self.screen)
+        for asteroid in self.asteroids_that_were_hit:
+            self.render_exploded_object(pos=asteroid.pos)
         if self.ship is not None:
             self.ship.render(self.screen)
             for bullet in self.ship.bullets:
                 bullet.render(self.screen.get_surface())
         else:
             self.render_exploded_object(self.ship_last_position)
-        for asteroid in self.asteroids:
-            asteroid.render(self.screen)
-        for asteroid in self.asteroids_that_were_hit:
-            self.render_exploded_object(pos=asteroid.pos)
+
+            # render game over text
+            game_over_lost = TextBox(text="You lost!", size=80)
+            text_pos = ((self.screen.screen_width - game_over_lost.get_text_width()) // 2,
+                        (self.screen.screen_height - game_over_lost.get_text_height()) // 2)
+            game_over_lost.render(screen=self.screen, pos=text_pos)
+        if not(self.asteroids):
+            seconds = self.timer.get_text()
+            game_over_win = TextBox(text=f"You won!", size=80)
+            text_pos = ((self.screen.screen_width - game_over_win.get_text_width()) // 2,
+                        (self.screen.screen_height - game_over_win.get_text_height()) // 2 - game_over_win.get_text_height())
+            game_over_win.render(screen=self.screen, pos=text_pos)
+            game_over_result = TextBox(text=f"Result: {seconds}!", size=80)
+            text_pos = ((self.screen.screen_width - game_over_result.get_text_width()) // 2,
+                        (self.screen.screen_height - game_over_result.get_text_height()) // 2 + game_over_win.get_text_height())
+            game_over_result.render(screen=self.screen, pos=text_pos)
         self.screen.update()
 
+    def restart(self):
+        self.__init__()
+
     def cleanup(self):
+        self.sound_theme.stop()
         pygame.quit()

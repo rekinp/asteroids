@@ -9,9 +9,9 @@ from pygame.mixer import Sound
 from settings import SoundAsset, ImageAsset
 
 class Ship():
-    DRIFT = False
-    ROTATION_SPEED = 4
-    SPEED = 3
+    DRIFT = True
+    ROTATION_SPEED = 3
+    SPEED = 2
     STARTING_VECTOR = Vector2(0, -1*SPEED)
     SHOOTING_COOLDOWN = 300
     def __init__(self, pos):
