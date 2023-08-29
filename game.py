@@ -13,7 +13,7 @@ from bullet import Bullet
 
 
 class Game:
-    NUMBER_OF_ASTEROIDS = 10
+    NUMBER_OF_ASTEROIDS = 9
     LOG = True
 
     def __init__(self):
@@ -32,8 +32,9 @@ class Game:
 
         # game objects
         self.screen = Screen(screen_width=ScreenSize.WIDTH.value, screen_height=ScreenSize.HEIGHT.value)
-        self.timer = TextBox(text='0', size=80)
+        self.timer = TextBox(text='22', size=80)
         pygame.time.set_timer(pygame.USEREVENT, 1000)
+        self.game_controls = TextBox(text=f"arrows - move;space - shoot;p - pause;r - restart", size=20)
         # ship
         self.ship = Ship(pos=(400, 400))
         safe_distance = 200
@@ -61,7 +62,16 @@ class Game:
             self.asteroids.append(asteroid)
 
     def destroy_asteroid(self, asteroid: Asteroid):
-        self.asteroids.remove(asteroid)
+        if asteroid.size >= 3:
+            self.asteroids.remove(asteroid)
+        else:
+            asteroid.decrease_asteroid_size()
+            new_asteroid = Asteroid(size=asteroid.size,
+                                    pos=asteroid.pos,
+                                    screen=self.screen)
+            new_asteroid.set_velocity(asteroid.velocity.rotate(30)*1.3)
+            asteroid.set_velocity(asteroid.velocity.rotate(-30)*1.3)
+            self.asteroids.append(new_asteroid)
 
     def destroy_asteroids(self, asteroids: List[Asteroid]):
         for asteroid in asteroids:
@@ -81,7 +91,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.game_over = True
             if event.type == pygame.USEREVENT and self.asteroids and self.ship is not None:
-                counter = int(self.timer.get_text()) + 1
+                counter = max(int(self.timer.get_text()) - 1, 0)
                 self.timer.set_text(text=str(counter))
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
@@ -162,6 +172,7 @@ class Game:
     def render(self):
         self.screen.render()
         self.timer.render(screen=self.screen, pos=(self.screen.screen_width*0.85, self.screen.screen_height*0.02))
+        self.game_controls.render_multiline(screen=self.screen, pos=(self.screen.screen_width*0.75, self.screen.screen_height*0.87))
         for asteroid in self.asteroids:
             asteroid.render(self.screen)
         for asteroid in self.asteroids_that_were_hit:
@@ -172,22 +183,18 @@ class Game:
                 bullet.render(self.screen.get_surface())
         else:
             self.render_exploded_object(self.ship_last_position)
-
             # render game over text
             game_over_lost = TextBox(text="You lost!", size=80)
-            text_pos = ((self.screen.screen_width - game_over_lost.get_text_width()) // 2,
-                        (self.screen.screen_height - game_over_lost.get_text_height()) // 2)
-            game_over_lost.render(screen=self.screen, pos=text_pos)
+            game_over_lost.render_multiline_center(screen=self.screen)
+        if int(self.timer.get_text()) <= 0:
+            # render game over text
+            game_over_lost = TextBox(text="You lost!;Time is out", size=80)
+            game_over_lost.render_multiline_center(screen=self.screen)
+            self.pause_game = True
         if not(self.asteroids):
             seconds = self.timer.get_text()
-            game_over_win = TextBox(text=f"You won!", size=80)
-            text_pos = ((self.screen.screen_width - game_over_win.get_text_width()) // 2,
-                        (self.screen.screen_height - game_over_win.get_text_height()) // 2 - game_over_win.get_text_height())
-            game_over_win.render(screen=self.screen, pos=text_pos)
-            game_over_result = TextBox(text=f"Result: {seconds}!", size=80)
-            text_pos = ((self.screen.screen_width - game_over_result.get_text_width()) // 2,
-                        (self.screen.screen_height - game_over_result.get_text_height()) // 2 + game_over_win.get_text_height())
-            game_over_result.render(screen=self.screen, pos=text_pos)
+            game_over_win = TextBox(text=f"You won!;Result: {seconds}!", size=80)
+            game_over_win.render_multiline_center(screen=self.screen)
         self.screen.update()
 
     def restart(self):

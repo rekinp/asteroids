@@ -10,8 +10,13 @@ class Asteroid:
         self.pos = Vector2(pos)
         self.size = size
         # self.velocity = Vector2(0,0)
-        self.velocity = Vector2(random.randint(-1, 1)*2, random.randint(-1, 1)*2)
-        if self.size in [1, 2, 3]:
+        x = random.randint(-self.size, self.size)
+        y = random.randint(-self.size, self.size)
+        while x == 0 and y == 0:
+            x = random.randint(-2, 2)
+            y = random.randint(-2, 2)
+        self.velocity = Vector2(x, y)
+        if self.size in [1, 2, 3]: #the higher number the smaller asteroid
             self.image = pygame.image.load(f"resources/images/asteroid{self.size}.png")
         else:
             self.image = pygame.image.load(f"resources/images/asteroid1.png")
@@ -24,6 +29,13 @@ class Asteroid:
         hitbox_ratio = (0.65+0.08*self.size)
         self.offset = (self.rect[2] * (1 - hitbox_ratio))//2
         self.hitbox = pygame.Rect(self.rect[0] + self.offset, self.rect[1] + self.offset, self.rect[2]*hitbox_ratio, self.rect[3]*hitbox_ratio)
+
+    def decrease_asteroid_size(self):
+        if self.size < 3:
+            self.size += 1
+            self.image = pygame.image.load(f"resources/images/asteroid{self.size}.png")
+            self.rect = self.image.get_rect(center=self.pos)
+            self.set_hitbox()
 
     def update_hitbox_position(self):
         self.hitbox[0] = self.rect[0] + self.offset
@@ -48,3 +60,5 @@ class Asteroid:
         self.rect = self.image.get_rect(center=self.pos)
         self.update_hitbox_position()
 
+    def set_velocity(self, velocity):
+        self.velocity = velocity
