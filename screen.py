@@ -14,7 +14,7 @@ class Screen:
     def blit(self, image, pos):
         self.screen.blit(image, pos)
 
-    def render(self):
+    def render_background(self):
         self.screen.blit(self.background, (0, 0))
 
     def wrap_position(self, pos):
@@ -22,6 +22,12 @@ class Screen:
 
     def update(self):
         pygame.display.update()
+
+    def get_height(self):
+        return self.screen_height
+
+    def get_width(self):
+        return self.screen_width
 
     def get_size(self):
         return self.screen_width, self.screen_height

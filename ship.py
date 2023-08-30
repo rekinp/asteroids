@@ -60,12 +60,7 @@ class Ship():
         self.set_rotated_image()
 
     def collides_with_asteroid(self, asteroid: Asteroid):
-        distance = sqrt(pow(asteroid.pos[0] - self.pos[0], 2) + pow(asteroid.pos[1] - self.pos[1], 2))
-        # print(f"distance: {distance}")
-        if distance <= self.hitbox[2]/2 + asteroid.hitbox[2]/2:
-            return True
-        else:
-            return False
+        return self.hitbox.colliderect(asteroid.hitbox)
 
     def shooting_cooldown_reduction(self, time):
         if self.can_shoot > 0:
@@ -77,25 +72,25 @@ class Ship():
         self.can_shoot = self.SHOOTING_COOLDOWN
 
     def move_forward(self):
+        DRIFTING_FACTOR = 0.6
         self.pos += self.forward
         if self.DRIFT:
-            self.drift = (self.drift + self.forward)*0.6
+            self.drift = (self.drift + self.forward) * DRIFTING_FACTOR
 
     def move_backward(self):
         self.pos -= self.forward
 
     def turn_left(self):
-        self.forward = self.forward.rotate(-1*self.ROTATION_SPEED)
+        self.forward = self.forward.rotate(-self.ROTATION_SPEED)
         self.set_angle()
-        # self.set_rotated_image()
 
     def turn_right(self):
-        self.forward = self.forward.rotate(1*self.ROTATION_SPEED)
+        self.forward = self.forward.rotate(self.ROTATION_SPEED)
         self.set_angle()
-        # self.set_rotated_image()
 
     def shoot(self):
-        bullet = Bullet(pos=Vector2(self.pos), velocity=self.forward * 5)
+        BULLET_SPEED = 5
+        bullet = Bullet(pos=Vector2(self.pos), velocity=self.forward * BULLET_SPEED)
         self.sound_shoot.play()
         self.cooldown_shooting()
         self.bullets.append(bullet)
@@ -117,5 +112,3 @@ class Ship():
     def render(self, screen):
         blit_pos = self.pos - Vector2(self.rotated_image.get_size()) // 2
         screen.blit(self.rotated_image, blit_pos)
-        # pygame.draw.rect(screen.get_surface(), (0, 255, 0), self.rect)
-        # pygame.draw.rect(screen.get_surface(), (0, 0, 255), self.hitbox)

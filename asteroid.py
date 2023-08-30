@@ -3,9 +3,16 @@ import random
 import pygame
 from pygame import Vector2
 from pygame.mixer import Sound
-from typing import List
+from settings import ImageAsset
 
 class Asteroid:
+    # the higher number the smaller asteroid
+    asteroid_images = {
+        1: pygame.image.load(ImageAsset.asteroid1.value),
+        2: pygame.image.load(ImageAsset.asteroid2.value),
+        3: pygame.image.load(ImageAsset.asteroid3.value)
+    }
+
     def __init__(self, size, pos, screen):
         self.pos = Vector2(pos)
         self.size = size
@@ -16,10 +23,7 @@ class Asteroid:
             x = random.randint(-2, 2)
             y = random.randint(-2, 2)
         self.velocity = Vector2(x, y)
-        if self.size in [1, 2, 3]: #the higher number the smaller asteroid
-            self.image = pygame.image.load(f"resources/images/asteroid{self.size}.png")
-        else:
-            self.image = pygame.image.load(f"resources/images/asteroid1.png")
+        self.image = Asteroid.asteroid_images.get(self.size, Asteroid.asteroid_images[1])
         self.sound_explode = Sound("resources/sounds/explosion.flac")
         self.pos = screen.wrap_position(pos=self.pos)
         self.rect = self.image.get_rect(center=self.pos)
@@ -28,7 +32,7 @@ class Asteroid:
     def set_hitbox(self):
         hitbox_ratio = (0.65+0.08*self.size)
         self.offset = (self.rect[2] * (1 - hitbox_ratio))//2
-        self.hitbox = pygame.Rect(self.rect[0] + self.offset, self.rect[1] + self.offset, self.rect[2]*hitbox_ratio, self.rect[3]*hitbox_ratio)
+        self.hitbox = pygame.Rect(self.pos[0] + self.offset, self.pos[1] + self.offset, self.rect[2]*hitbox_ratio, self.rect[3]*hitbox_ratio)
 
     def decrease_asteroid_size(self):
         if self.size < 3:
@@ -44,7 +48,7 @@ class Asteroid:
     def collides_with_asteroids(self, asteroids):
         collided_asteroids = []
         for asteroid in asteroids:
-            if self.rect.colliderect(asteroid.rect):
+            if self.hitbox.colliderect(asteroid.hitbox):
                 collided_asteroids.append(asteroid)
         return collided_asteroids
 

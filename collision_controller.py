@@ -6,13 +6,14 @@ class CollisionController:
         asteroids_that_were_hit = []
         bullets_that_hit_asteroids = []
         asteroids_hit = 0
-        for b in bullets:
-            asteroids_hit_by_bullet = CollisionController.find_asteroids_hit_by_bullet(asteroids, b)
-            if asteroids_hit_by_bullet:
-                asteroids_that_were_hit.extend(asteroids_hit_by_bullet)
-            if len(asteroids_that_were_hit) > asteroids_hit:
-                bullets_that_hit_asteroids.append(b)
-                asteroids_hit += len(asteroids_hit_by_bullet)
+        if asteroids and bullets:
+            for b in bullets:
+                asteroids_hit_by_bullet = CollisionController.find_asteroids_hit_by_bullet(asteroids, b)
+                if asteroids_hit_by_bullet:
+                    asteroids_that_were_hit.extend(asteroids_hit_by_bullet)
+                if len(asteroids_that_were_hit) > asteroids_hit:
+                    bullets_that_hit_asteroids.append(b)
+                    asteroids_hit += len(asteroids_hit_by_bullet)
         return asteroids_that_were_hit, bullets_that_hit_asteroids
 
     @staticmethod

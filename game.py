@@ -150,9 +150,14 @@ class Game:
         self.screen.blit(img, img.get_rect(center=pos))
 
     def render(self):
-        self.screen.render()
-        self.timer.render(screen=self.screen, pos=(self.screen.screen_width*0.85, self.screen.screen_height*0.02))
-        self.game_controls.render_multiline(screen=self.screen, pos=(self.screen.screen_width*0.75, self.screen.screen_height*0.87))
+        TEXT_SIZE = 80
+        timer_position_ratio = (0.85, 0.02)
+        game_controls_position_ratio = (0.75, 0.87)
+        self.screen.render_background()
+        self.timer.render(screen=self.screen, pos=(self.screen.screen_width * timer_position_ratio[0],
+                                                   self.screen.screen_height * timer_position_ratio[1]))
+        self.game_controls.render_multiline(screen=self.screen, pos=(self.screen.screen_width * game_controls_position_ratio[0],
+                                                                     self.screen.screen_height * game_controls_position_ratio[1]))
         for asteroid in self.asteroids:
             asteroid.render(self.screen)
         for asteroid in self.asteroids_that_were_hit:
@@ -164,16 +169,16 @@ class Game:
         else:
             self.render_exploded_object(self.ship_last_position)
             # render game over text
-            game_over_lost = TextBox(text="You lost!", size=80)
+            game_over_lost = TextBox(text="You lost!", size=TEXT_SIZE)
             game_over_lost.render_multiline_center(screen=self.screen)
         if int(self.timer.get_text()) <= 0:
             # render game over text
-            game_over_lost = TextBox(text="You lost!;Time is out", size=80)
+            game_over_lost = TextBox(text="You lost!;Time is out", size=TEXT_SIZE)
             game_over_lost.render_multiline_center(screen=self.screen)
             self.pause_game = True
         if not(self.asteroids):
             seconds = self.timer.get_text()
-            game_over_win = TextBox(text=f"You won!;Result: {seconds}!", size=80)
+            game_over_win = TextBox(text=f"You won!;Result: {seconds}!", size=TEXT_SIZE)
             game_over_win.render_multiline_center(screen=self.screen)
         self.screen.update()
 

@@ -1,6 +1,4 @@
 from enum import Enum
-import pygame
-
 
 class ScreenSize(Enum):
     WIDTH = 800
@@ -13,8 +11,8 @@ class SoundAsset(Enum):
 
 class ImageAsset(Enum):
     asteroid1 = "resources/images/asteroid1.png"
-    asteroid2 = "resources/images/asteroid1.png"
-    asteroid3 = "resources/images/asteroid1.png"
+    asteroid2 = "resources/images/asteroid2.png"
+    asteroid3 = "resources/images/asteroid3.png"
     ship = "resources/images/ship.png"
     space = "resources/images/space.png"
     explosion = "resources/images/explosion.png"
