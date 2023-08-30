@@ -7,13 +7,14 @@ from text_box import TextBox
 from screen import Screen
 from ship import Ship
 from asteroid import Asteroid
+from collision_controller import CollissionController
 from settings import ScreenSize, ImageAsset, SoundAsset
 from pygame.mixer import Sound
 from bullet import Bullet
 
 
 class Game:
-    NUMBER_OF_ASTEROIDS = 9
+    NUMBER_OF_ASTEROIDS = 8
     LOG = True
 
     def __init__(self):
@@ -32,7 +33,7 @@ class Game:
 
         # game objects
         self.screen = Screen(screen_width=ScreenSize.WIDTH.value, screen_height=ScreenSize.HEIGHT.value)
-        self.timer = TextBox(text='22', size=80)
+        self.timer = TextBox(text='23', size=80)
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.game_controls = TextBox(text=f"arrows - move;space - shoot;p - pause;r - restart", size=20)
         # ship
@@ -123,7 +124,8 @@ class Game:
                 bullet.update()
 
             # asteroid-bullet
-            self.detect_asteroid_bullet_collisions()
+            self.asteroids_that_were_hit, self.bullets_that_hit_asteroids = CollissionController.detect_asteroid_bullet_collisions(asteroids=self.asteroids,
+                                                                                                                                   bullets=self.ship.bullets)
             for asteroid in self.asteroids_that_were_hit:
                 self.destroy_asteroid(asteroid)
                 asteroid.sound_explode.play()
@@ -142,28 +144,6 @@ class Game:
                     self.ship_last_position = self.ship.pos
                     self.ship = None
                     break
-
-
-    def detect_asteroid_bullet_collisions(self):
-        asteroids = []
-        bullets = []
-        asteroids_hit = 0
-        for b in self.ship.bullets:
-            asteroids_hit_by_bullet = self.find_asteroids_hit_by_bullet(b)
-            if asteroids_hit_by_bullet:
-                asteroids.extend(asteroids_hit_by_bullet)
-            if len(asteroids) > asteroids_hit:
-                bullets.append(b)
-                asteroids_hit += len(asteroids_hit_by_bullet)
-        self.asteroids_that_were_hit = asteroids
-        self.bullets_that_hit_asteroids = bullets
-
-    def find_asteroids_hit_by_bullet(self, bullet: Bullet):
-        asteroids = []
-        for asteroid in self.asteroids:
-            if asteroid.hitbox.colliderect(bullet.rect):
-                asteroids.append(asteroid)
-        return asteroids
 
     def render_exploded_object(self, pos):
         img = pygame.image.load(ImageAsset.explosion.value)
