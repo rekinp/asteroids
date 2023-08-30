@@ -7,7 +7,7 @@ from text_box import TextBox
 from screen import Screen
 from ship import Ship
 from asteroid import Asteroid
-from collision_controller import CollissionController
+from collision_controller import CollisionController
 from settings import ScreenSize, ImageAsset, SoundAsset
 from pygame.mixer import Sound
 from bullet import Bullet
@@ -124,8 +124,8 @@ class Game:
                 bullet.update()
 
             # asteroid-bullet
-            self.asteroids_that_were_hit, self.bullets_that_hit_asteroids = CollissionController.detect_asteroid_bullet_collisions(asteroids=self.asteroids,
-                                                                                                                                   bullets=self.ship.bullets)
+            self.asteroids_that_were_hit, self.bullets_that_hit_asteroids = CollisionController.detect_asteroid_bullet_collisions(asteroids=self.asteroids,
+                                                                                                                                  bullets=self.ship.bullets)
             for asteroid in self.asteroids_that_were_hit:
                 self.destroy_asteroid(asteroid)
                 asteroid.sound_explode.play()
