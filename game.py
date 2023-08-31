@@ -26,6 +26,7 @@ class Game:
 
         # sounds
         self.sound_theme = Sound(SoundAsset.theme.value)
+        self.sound_theme_duration = 30
 
         # game controls
         self.game_over = False
@@ -80,6 +81,7 @@ class Game:
 
     def run(self):
         self.sound_theme.play(0)
+        self.sound_theme_start_time = pygame.time.get_ticks()
         while not self.game_over:
             self.handle_events()
             if not self.pause_game:
@@ -99,7 +101,7 @@ class Game:
                     self.pause_game = not (self.pause_game)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    self.__init__()
+                    self.restart()
         if not (self.pause_game) and not (self.ship is None):
             key_pressed: ScancodeWrapper = pygame.key.get_pressed()
             if key_pressed[pygame.K_UP] or key_pressed[pygame.K_DOWN] or key_pressed[pygame.K_LEFT] or key_pressed[
@@ -184,7 +186,14 @@ class Game:
 
     def restart(self):
         self.__init__()
+        if pygame.mixer.get_busy():
+            elapsed_time = pygame.time.get_ticks() - self.sound_theme_start_time
+            if elapsed_time > self.sound_theme_duration * 1000:
+                pygame.mixer.stop()
+                self.sound_theme.play(0)
+                self.sound_theme_start_time = pygame.time.get_ticks()
+
 
     def cleanup(self):
-        self.sound_theme.stop()
+        pygame.mixer.stop()
         pygame.quit()
